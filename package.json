@@ -1,0 +1,39 @@
+{
+  "name": "github-notification-observer",
+  "version": "1.0.0",
+  "description": "Observable Github notifications",
+  "main": "dist/mod.js",
+  "module": "dist/mod.es.js",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "keywords": [
+    "github",
+    "notification",
+    "observable"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trs/github-notification-observer.git"
+  },
+  "author": {
+    "email": "git@tylerstewart.ca",
+    "name": "Tyler Stewart",
+    "url": "https://tylerstewart.ca"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^5.0.2",
+    "@types/node": "^14.0.26",
+    "@types/node-fetch": "^2.5.7",
+    "rollup": "^2.23.0",
+    "semantic-release": "^17.1.1",
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "abort-controller": "^3.0.0",
+    "node-fetch": "^2.6.0",
+    "rxjs": "^6.6.0"
+  }
+}
