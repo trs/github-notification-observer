@@ -1,8 +1,9 @@
-import { timer, BehaviorSubject } from 'rxjs';
+import { timer, BehaviorSubject, Observable } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 import { tap, switchMap, take, map, filter } from 'rxjs/operators';
 import fetch from 'node-fetch';
 import AbortController from 'abort-controller';
+import { GithubNotifications } from './notification';
 
 // @ts-ignore
 global.fetch = fetch;
@@ -45,7 +46,7 @@ const delayMap = <T>(delay: number, value: T) => timer(delay).pipe(take(1), map(
  * @param since Only show notifications updated after the given time. This is a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: **YYYY-MM-DDTHH:MM:SSZ**.
  * @param before Only show notifications updated before the given time. This is a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: **YYYY-MM-DDTHH:MM:SSZ**.
  */
-export const githubNotifications = (args: Parameters) => {
+export const githubNotifications = (args: Parameters): Observable<GithubNotifications> => {
   const intervalSubject = new BehaviorSubject<State>({ delay: 0, since: null });
 
   const url = new URL('notifications', GITHUB_API_URL);

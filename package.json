@@ -1,9 +1,10 @@
 {
   "name": "github-notification-observer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Observable Github notifications",
   "main": "dist/mod.js",
   "module": "dist/mod.es.js",
+  "types": "dist/mod.d.ts",
   "scripts": {
     "build": "rollup -c"
   },
