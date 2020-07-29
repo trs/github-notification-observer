@@ -16,11 +16,6 @@ const GITHUB_API_URL = 'https://api.github.com';
 
 // Types
 
-interface State {
-  delay: number;
-  since: string | null;
-}
-
 interface Parameters {
   token: string;
   all?: boolean;
@@ -34,8 +29,6 @@ interface Parameters {
 const excludeNilValues = <T extends Record<string, any>>(obj: T) =>
   Object.fromEntries(Object.entries(obj).filter(([_, value]) => value !== undefined && value !== null)) as Partial<T>;
 
-const delayMap = <T>(delay: number, value: T) => timer(delay).pipe(take(1), map(() => value));
-
 // Implementation
 
 /**
@@ -47,7 +40,7 @@ const delayMap = <T>(delay: number, value: T) => timer(delay).pipe(take(1), map(
  * @param before Only show notifications updated before the given time. This is a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: **YYYY-MM-DDTHH:MM:SSZ**.
  */
 export const githubNotifications = (args: Parameters): Observable<GithubNotifications> => {
-  const intervalSubject = new BehaviorSubject<State>({ delay: 0, since: null });
+  const intervalSubject = new BehaviorSubject<number>(0);
 
   const url = new URL('notifications', GITHUB_API_URL);
   typeof args.all === 'boolean' && url.searchParams.append('all', String(args.all));
@@ -56,14 +49,13 @@ export const githubNotifications = (args: Parameters): Observable<GithubNotifica
   typeof args.before === 'string' && url.searchParams.append('before', args.before);
 
   return intervalSubject.pipe(
-    switchMap(({delay, since}) => delayMap(delay, since)),
-    switchMap((since) => fromFetch(url.href, {
+    switchMap((delay) => timer(delay)),
+    switchMap(() => fromFetch(url.href, {
       method: 'get',
       headers: excludeNilValues({
-        'User-Agent': 'Github-Notificaion-Poll',
+        'User-Agent': 'Github-Notificaion-Observer',
         'Accept': 'application/vnd.github.v3+json',
-        'Authorization': `token ${args.token}`,
-        'If-Modified-Since': since
+        'Authorization': `token ${args.token}`
       })
     })),
     switchMap(async (res) => {
@@ -80,12 +72,10 @@ export const githubNotifications = (args: Parameters): Observable<GithubNotifica
       return res;
     }),
     tap((res) => {
-      let {delay, since} = intervalSubject.getValue();
-
+      let delay = intervalSubject.getValue();
       delay = Number(res.headers.get('x-poll-interval') ?? 60) * 1000;
-      since = res.headers.get('last-modified') ?? since;
 
-      intervalSubject.next({delay, since});
+      intervalSubject.next(delay);
     }),
     filter((res) => res.status !== 304 /* Not Modified */),
     switchMap(async (res) => res.json())
